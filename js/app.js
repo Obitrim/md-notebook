@@ -3,7 +3,7 @@ let app = new Vue({
 		return {
 			// ui - based data
 			sidebarVisible: false,
-			currentView: 'dashboard',
+			currentView: 'guide',
 
 			// notes - based data
 			notes: JSON.parse(localStorage.getItem('notes')) || [],

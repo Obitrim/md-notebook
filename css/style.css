@@ -115,7 +115,7 @@ p {
 }
 
 .sidebar__link {
-	text-decoration: none;
+	text-decoration: none !important;
 	display: block;
 	padding: 0.5rem 1rem;
 
@@ -281,7 +281,7 @@ p {
 
 .note-preview-board {
 	background-color: var(--white);
-	padding: 1rem;
+	padding: 2rem 1rem 1rem;
 	border-radius: 3px;
 }
 
@@ -388,6 +388,10 @@ p {
 	margin-left: 1rem;
 }
 
+.guide__board {
+	padding: 1rem;
+	background-color: var(--white);
+}
 
 @media (min-width: 576px){
 	.dashboard__dashes {
