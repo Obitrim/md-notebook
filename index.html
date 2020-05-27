@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Markdown Notebook</title>
+	
+	<!-- custom css -->
+	<link rel="stylesheet" href="css/style.css">
+	<!-- mdi -->
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/5.2.45/css/materialdesignicons.min.css"/>
+	<!-- vuejs -->
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+	
+	<div id="notebook">
+
+		<!-- sidebar -->		
+		<div class="sidebar" 
+			v-if="sidebarVisible" 
+			:class="{ show: sidebarVisible }" 
+			@click.self="openSidebar(false)"
+			>
+			<nav class="sidebar__nav" >
+				<div class="logo-wrapper">
+					<img src="images/logo.png" alt="mark down" class="logo">
+				</div>
+				<ul class="sidebar__list">
+					<li class="sidebar__item">
+						<a href="#" 
+							@click.prevent="showView('dashboard')" 
+							:class="{ active: currentView === 'dashboard'}" 
+							class="sidebar__link"
+							>Dashboard</a>
+					</li>
+					<li class="sidebar__item">
+						<a href="#" 
+							@click.prevent="showView('preview')" 
+							:class="{ active: currentView === 'preview'}" 
+							class="sidebar__link"
+							>Notes</a>
+					</li>
+					<li class="sidebar__item">
+						<a href="#" 
+							@click.prevent="showView('new')" 
+							:class="{ active: currentView === 'new'}" 
+							class="sidebar__link"
+							>Create</a>
+					</li>
+					<li class="sidebar__item">
+						<a href="#" 
+							@click.prevent="showView('guides')" 
+							:class="{ active: currentView === 'guides'}" 
+							class="sidebar__link"
+							>Guide</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+		
+		<!-- Views -->
+		<main class="main">
+
+			<!-- toolbar -->
+			<div class="toolbar">
+				<button class="hamburgar" @click="sidebarVisible = !sidebarVisible">
+					<i class="mdi mdi-menu"></i>
+				</button>
+				<div class="tools">
+					<button 
+						class="btn-create" 
+						@click.prevent="showView('new')"
+						v-if="currentView != 'new'"
+						>
+						<i class="mdi mdi-note"></i>&nbsp;Create
+					</button>
+				</div>
+			</div>
+
+			<!--dashboard view-->
+			<section class="main__view dashboard" v-if="currentView == 'dashboard'">
+				<div class="dashboard__dashes">
+					<div class="dash">
+						<span class="dash__number">{{ notesCount }}</span>
+						<span class="dash__text">Note(s) Created</span>
+					</div>
+					<div class="dash">
+						<span class="dash__number">{{ favoritesCount }}</span>
+						<span class="dash__text">Favorite(s)</span>
+					</div>
+				</div>
+				<div class="recents-container">
+					<h3>Recently viewed</h3>
+					<div class="recents">
+						<div class="notepad" v-for="(note, index) in recentNotes" :key="index">
+							<h3 class="notepad__title">{{ note.title }}</h3>
+							<button class="notepad__btn" @click="previewNote(note)">Preview</button>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- note preview -->
+			<section class="main__view note-preview" v-else-if="currentView == 'preview'">
+				<div class="search-box">
+					<label for="key">Search</label>
+					<input type="text" 
+						name="key" 
+						placeholder="Note title" 
+						id="key" 
+						v-model="key"
+						/>
+					<div class="suggested-results" v-if="matchedResults.length">
+						<ul class="results-list">
+							<li 
+								class="result-item" 
+								v-for="(note, index) in matchedResults" 
+								:key="index" 
+								@click="selectNote(note)"
+								>
+								{{ note.title }}
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="note-preview-board" v-if="selectedNote">
+					<div class="action-btns">
+						<button class="action-btn" 
+							:class="{ 'action-star': selectedNote.favorite }"
+							@click="markAsFavorite"
+							>
+							<i class="mdi mdi-star"></i>
+						</button>
+						<button class="action-btn action-edit" @click="editNote"><i class="mdi mdi-rename-box"></i></button>
+						<button class="action-btn action-delete" @click="removeNote"><i class="mdi mdi-delete"></i></button>
+					</div>
+					<div class="note-preview-content" v-html="notePreview"></div>
+				</div>
+			</section>
+
+			<!-- Create Note -->
+			<section class="main__view create-note" v-else-if="currentView == 'new'">
+				<form action="#" @submit.prevent="" id="newnote">
+					<div class="form-group">
+						<label for="title">Title</label>
+						<input type="text" name="title" id="title" placeholder="Title..." v-model="newNote.title"/>
+					</div>
+					<div class="form-group">
+						<label for="content">Note Content</label>
+						<textarea name="content" id="content" placeholder="Type markdown note here..." v-model="newNote.content"></textarea>
+					</div>
+					<div class="form-group create-note__btn-bar">
+						<button class="btn-preview" @click.prevent="previewNote">
+							<i class="mdi mdi-note"></i>&nbsp;Notes
+						</button>
+						<button class="btn-create" @click.prevent="addNote">
+							<i class="mdi mdi-plus"></i>&nbsp;Add Note
+						</button>
+					</div>
+				</form>
+			</section>
+
+			<!-- Guides -->
+			<section class="main__view guide" v-else>Guides</section>
+		</main>
+	</div>
+
+	<!--markedjs-->
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<!-- moment -->
+	<script src="https://cdn.jsdelivr.net/npm/moment@2.26.0/moment.min.js"></script>
+	<script src="js/app.js" ></script>
+</body>
+</html>
