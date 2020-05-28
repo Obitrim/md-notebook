@@ -3,7 +3,7 @@ let app = new Vue({
 		return {
 			// ui - based data
 			sidebarVisible: false,
-			currentView: 'guide',
+			currentView: 'guides',
 
 			// notes - based data
 			notes: JSON.parse(localStorage.getItem('notes')) || [],
@@ -115,6 +115,8 @@ let app = new Vue({
 					// old note with edited content
 					this.notes.splice( editedNoteIndex, 1, editedNote);
 					this.editMode = false;
+					swal('Success', 'Note Edited successfully', 'success');
+
 				} else {
 					this.notes.push({
 						id: this.uniqueUUID(),
@@ -123,6 +125,8 @@ let app = new Vue({
 						createdAt: new Date(),
 						favorite: false
 					});
+					swal('Success', 'Note Created successfully', 'success');
+
 				}
 
 				this.newNote.title = '';
@@ -169,12 +173,11 @@ let app = new Vue({
 		 * @returns {undefined} 
 		 */
 		addToRecentlyViewed(note){
-			let noteInRecents = this.recentNotes.find(recentNote => recentNote == note);
+			let noteIndex = this.recentNotes.indexOf(note);
 
 			// If note already exists in the recents, remove it
-			if(noteInRecents){
-				let recentNoteIndex = this.recentNotes.indexOf(note);
-				this.recentNotes.splice(recentNoteIndex, 1);
+			if(noteIndex > -1){
+				this.recentNotes.splice(noteIndex, 1);
 			}
 
 			this.recentNotes.unshift(note);
@@ -215,17 +218,30 @@ let app = new Vue({
 		 * @returns {undefined} 
 		 */
 		removeNote(){
-			let noteIndex = this.notes.indexOf(this.selectedNote);
+			swal({
+				title: 'Are you sure',
+				text: 'Once deleted, note wont\'t be accessible anymore',
+				icon: 'warning',
+				buttons: true,
+				dangerMode: true
+			})
+			.then(willDelete => {
+				if(willDelete){
+					let noteIndex = this.notes.indexOf(this.selectedNote);
 
-			if(noteIndex !== -1){
-				let prevNote = noteIndex > 0 ? noteIndex - 1 : 0;
-				this.notes.splice(noteIndex, 1);
-				// noteIndex = this.recentNotes.indexOf(this.selectedNote);
-				// this.recentNotes.splice(noteIndex, 1);
-				this.selectedNoteId = this.notes[prevNote]?.id;
-			}
-			
+					if(noteIndex > -1){
+						let prevNote = noteIndex > 0 ? noteIndex - 1 : 0;
+						this.notes.splice(noteIndex, 1);
 
+						// remove note from recently viewed
+						// noteIndex = this.recentNotes.indexOf(this.selectedNote);
+						// this.recentNotes.splice(noteIndex, 1);
+						this.selectedNoteId = this.notes[prevNote]?.id;
+					}
+
+					swal('Success', 'Note deleted successfully', 'success');
+				}
+			})
 		},
 
 		/**
@@ -250,6 +266,22 @@ let app = new Vue({
 		 * @returns {undefined} 
 		 */
 		previewNote(note = this.selectedNote){
+			if(this.notes.indexOf(note) === -1){
+				let noteIndex = this.recentNotes.indexOf(note);
+				swal('OOOPS!', 'The note you are trying to view has been deleted', 'error').then(value => {
+					this.recentNotes.splice(noteIndex, 1);
+				})
+				
+				return;
+			}
+			// swal({
+			// 	title: 'OOOPS!',
+			// 	text: 'The note you are trying to view has been deleted',
+			// 	icon: 'error'
+			// })
+			// .then(value => {
+			// })
+
 			this.selectNote(note);
 			this.currentView = 'preview';
 		},
